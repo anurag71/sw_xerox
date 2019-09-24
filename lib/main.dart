@@ -8,23 +8,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 void main() => runApp(new MaterialApp(
 
-home: MyApp(),
+home: MyHomePage(),
 debugShowCheckedModeBanner: false,));
 
-class MyApp extends StatelessWidget {
-  // This widget is the root of your application.
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      home: MyHomePage(title: 'Flutter Demo Home Page'),
-    );
-  }
-}
 
 class MyHomePage extends StatefulWidget {
   MyHomePage({Key key, this.title}) : super(key: key);
@@ -55,11 +41,16 @@ class _MyHomePageState extends State<MyHomePage> {
 
   CameraPosition _currentCameraPosition;
 
+  Map<MarkerId, Marker> markers = <MarkerId, Marker>{};
+
   GoogleMap googleMap;
+
+  List<Map<String,Map<double,double>>> data = new List();
 
   @override
   void initState() {
     super.initState();
+    _getDocuments();
 
   }
 
@@ -122,6 +113,8 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
 
+    markers.addAll();
+
     googleMap = GoogleMap(
       mapType: MapType.normal,
       myLocationEnabled: true,
@@ -130,8 +123,7 @@ class _MyHomePageState extends State<MyHomePage> {
         _controller.complete(controller);
       },
     );
-
-    _getDocuments();
+//    _storeDocuments();
 
     return
       (_permission)?
@@ -155,11 +147,19 @@ class _MyHomePageState extends State<MyHomePage> {
       );
   }
 
-  _getDocuments() async {
-    List<Map<String,String>> data = new List();
-    QuerySnapshot querySnapshot = await collectionReference.getDocuments();
-    var list = querySnapshot.documents;
-    //list.forEach((DocumentSnapshot snap) => data.add({snap.data.keys:snap.data.values}));
+   _getDocuments() async {
+
+     List<DocumentSnapshot> list;
+
+
+
+     QuerySnapshot querySnapshot = await collectionReference.getDocuments();
+    list = querySnapshot.documents;
+
+
+
+
+    list.forEach((DocumentSnapshot snap) => data.add({snap.data["name"]:{snap.data["latitude"]:snap.data["longitude"]}}));
     print("This is the data fetched");
     print(data);
   }
