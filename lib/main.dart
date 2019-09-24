@@ -159,7 +159,7 @@ class _MyHomePageState extends State<MyHomePage> {
     List<Map<String,String>> data = new List();
     QuerySnapshot querySnapshot = await collectionReference.getDocuments();
     var list = querySnapshot.documents;
-    list.forEach((DocumentSnapshot snap) => data.add({snap.data.keys:snap.data.values}));
+    //list.forEach((DocumentSnapshot snap) => data.add({snap.data.keys:snap.data.values}));
     print("This is the data fetched");
     print(data);
   }
