@@ -42,10 +42,11 @@ class _MyHomePageState extends State<MyHomePage> {
   CameraPosition _currentCameraPosition;
 
   Map<MarkerId, Marker> markers = <MarkerId, Marker>{};
+  Map<String,List<String>> shops = new Map();
 
   GoogleMap googleMap;
 
-  List<Map<String,Map<double,double>>> data = new List();
+  Map<String,List<double>> data = new Map();
 
   @override
   void initState() {
@@ -104,6 +105,8 @@ class _MyHomePageState extends State<MyHomePage> {
       location = null;
     }
 
+
+
   }
 
 
@@ -113,8 +116,6 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
 
-    markers.addAll();
-
     googleMap = GoogleMap(
       mapType: MapType.normal,
       myLocationEnabled: true,
@@ -122,6 +123,7 @@ class _MyHomePageState extends State<MyHomePage> {
       onMapCreated: (GoogleMapController controller) {
         _controller.complete(controller);
       },
+      markers: Set<Marker>.of(markers.values),
     );
 //    _storeDocuments();
 
@@ -159,9 +161,86 @@ class _MyHomePageState extends State<MyHomePage> {
 
 
 
-    list.forEach((DocumentSnapshot snap) => data.add({snap.data["name"]:{snap.data["latitude"]:snap.data["longitude"]}}));
-    print("This is the data fetched");
+    list.forEach((DocumentSnapshot snap) =>
+    {
+      data.addAll({snap.data["name"]: [snap.data["latitude"], snap.data["longitude"]]}),
+      shops.addAll({snap.data["name"]: [snap.data["address"], snap.data["contact"]]})
+    }
+    );
+    print("The is the data fetched");
     print(data);
+
+    data.forEach((key,value)=>(
+    _add(key)
+    ));
+
+    print("Added markers");
+
+  }
+
+  _add(name){
+    MarkerId markerId = MarkerId(name);
+
+    Marker marker = Marker(
+      markerId: markerId,
+
+      position: LatLng(data[markerId.value][0],data[markerId.value][1]),
+      infoWindow:
+    InfoWindow(title: markerId.value),
+      onTap: () {
+        _showModal(markerId.value);
+      },
+    );
+
+    setState(() {
+      // adding a new marker to map
+      markers[markerId] = marker;
+    });
+  }
+
+  void _showModal(name) {
+    Future<void> future = showModalBottomSheet<void>(
+      context: context,
+      builder: (BuildContext context) {
+        return Padding(
+          padding: const EdgeInsets.all(10.0),
+          child: Container(
+            child: Wrap(
+              children: <Widget>[
+                Column(
+                  children: <Widget>[
+                    Text(
+                      name,
+                      style: TextStyle(
+                        fontSize: 40
+                      ),
+                    ),
+                    Text(
+                      shops[name][0],
+                      style: TextStyle(
+                          fontSize: 25
+                      ),
+                    ),
+                    Text(
+                      shops[name][1],
+                      style: TextStyle(
+                          fontSize: 25
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+
+            ),
+          ),
+        );
+      },
+    );
+    future.then((void value) => _closeModal(value));
+  }
+
+  void _closeModal(void value) {
+//      Navigator.pop(context)
   }
 
 }
