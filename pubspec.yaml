@@ -28,6 +28,7 @@ dependencies:
   permission_handler:
   firebase_analytics: ^4.0.2
   cloud_firestore:
+  geolocator:
 
 dev_dependencies:
   flutter_test:
