@@ -9,6 +9,7 @@ import 'package:flutter/services.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:math' show cos, sqrt, asin;
+import 'package:queries/collections.dart';
 
 void main() => runApp(new MaterialApp(
       home: MyHomePage(),
@@ -89,8 +90,9 @@ class _MyHomePageState extends State<MyHomePage> {
             if (mounted) {
               setState(() {
                 _currentLocation = result;
-                getDistanceList();
+
               });
+              getDistanceList();
             }
           });
         }
@@ -162,9 +164,12 @@ class _MyHomePageState extends State<MyHomePage> {
     print("The is the data fetched");
     print(data);
 
-    data.forEach((key, value) => (_add(key)));
+    //data.forEach((key, value) => (_add(key)));
 
-    print("Added markers");
+    //print("Added markers");
+
+
+
   }
 
   double calculateDistance(lat1, lon1, lat2, lon2) {
@@ -177,12 +182,13 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   getDistanceList() {
-    List<Map<String, double>> nameDistMap = new List();
+    Map<String, double> nameDistMap = new Map();
     for (int i = 0; i < data.length; i++) {
       var shop_name = data.keys.elementAt(i);
       var curr_list = data.values.elementAt(i);
       var curr_lat = curr_list[0];
       var curr_lng = curr_list[1];
+     // var current_lat = _currentLocation.latitude;
 //      Future<double> distance = geolocator_class.Geolocator().distanceBetween(
 //      _currentLocation.latitude
 //    ,
@@ -192,15 +198,26 @@ class _MyHomePageState extends State<MyHomePage> {
 //      double dist_value;
 //      distance.then((value) => dist_value=value);
 
-      double distance = calculateDistance(_currentLocation.latitude,
-          _currentLocation.longitude, curr_lat, curr_lng);
+      //print(current_lat);
 
-      nameDistMap.add({shop_name: distance});
-    nameDistMap.sort();
+      double distance = calculateDistance(_currentLocation.latitude, _currentLocation.longitude, curr_lat, curr_lng);
+
+      nameDistMap.addAll({shop_name: distance});
+      }
+    var query = Dictionary.fromMap(nameDistMap)
+        .orderBy((e) => e.value)
+        .toDictionary$1((kv) => kv.key, (kv) => kv.value);
+
+
+    for(int i= 0;i<query.length;i++){
+      if(query.elementAt(i).value<0.5){
+        _add(query.elementAt(i).key);
+      }
     }
-    print("----------------------------");
-    print(nameDistMap);
-    print("----------------------------");
+//
+//    print("----------------------------");
+//    print(query.toMap());
+//    print("----------------------------");
   }
 
   _add(name) {
