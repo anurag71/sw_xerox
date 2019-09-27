@@ -30,6 +30,7 @@ dependencies:
   cloud_firestore:
   geolocator:
   queries: ^0.1.12
+  url_launcher: ^5.1.4
 
 dev_dependencies:
   flutter_test:

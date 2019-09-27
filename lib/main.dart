@@ -4,12 +4,13 @@ import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'dart:async';
 import 'package:location/location.dart' as location_class;
-import 'package:geolocator/geolocator.dart' as geolocator_class;
+//import 'package:geolocator/geolocator.dart' as geolocator_class;
 import 'package:flutter/services.dart';
-import 'package:permission_handler/permission_handler.dart';
+//import 'package:permission_handler/permission_handler.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:math' show cos, sqrt, asin;
 import 'package:queries/collections.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 void main() => runApp(new MaterialApp(
       home: MyHomePage(),
@@ -57,10 +58,12 @@ class _MyHomePageState extends State<MyHomePage> {
   void initState() {
     super.initState();
     _getDocuments();
+
   }
 
   // Platform messages are asynchronous, so we initialize in an async method.
   initPlatformState() async {
+
     await _locationService.changeSettings(
         accuracy: location_class.LocationAccuracy.HIGH, interval: 1000);
 
@@ -215,9 +218,9 @@ class _MyHomePageState extends State<MyHomePage> {
       }
     }
 //
-//    print("----------------------------");
-//    print(query.toMap());
-//    print("----------------------------");
+    print("----------------------------");
+    print(query.toMap());
+    print("----------------------------");
   }
 
   _add(name) {
@@ -238,6 +241,14 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
+  _launchURL(url) async {
+    if (await canLaunch(url)) {
+      await launch(url);
+    } else {
+      throw 'Could not launch $url';
+    }
+  }
+
   void _showModal(name) {
     Future<void> future = showModalBottomSheet<void>(
       context: context,
@@ -254,12 +265,18 @@ class _MyHomePageState extends State<MyHomePage> {
                       style: TextStyle(fontSize: 40),
                     ),
                     Text(
-                      shops[name][0],
+                      "Address:"+shops[name][0],
                       style: TextStyle(fontSize: 25),
                     ),
                     Text(
-                      shops[name][1],
+                      "Contact:"+shops[name][1],
                       style: TextStyle(fontSize: 25),
+                    ),
+                    RaisedButton.icon(
+
+                      onPressed: () => _launchURL("google.navigation:q=${data[name][0]},${data[name][1]}"),
+                      icon: Icon(Icons.location_on),
+                      label: Text("Open Maps"),
                     ),
                   ],
                 ),
