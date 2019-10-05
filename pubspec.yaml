@@ -31,6 +31,18 @@ dependencies:
   geolocator:
   queries: ^0.1.12
   url_launcher: ^5.1.4
+  firebase_storage: ^3.0.6
+  flutter_pdfview: ^1.0.0+9
+  path_provider:
+  http:
+  file_picker: ^1.4.2
+  flutter_document_picker: ^3.0.0
+  dio: ^3.0.2
+  progress_indicators: ^0.1.2
+  firebase_messaging: ^5.1.6
+  firebase_in_app_messaging: ^0.0.1+3
+  firebase_core: ^0.4.0+9
+  
 
 dev_dependencies:
   flutter_test:
