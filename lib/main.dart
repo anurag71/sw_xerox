@@ -11,6 +11,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:math' show cos, sqrt, asin;
 import 'package:queries/collections.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:sw_xerox/PDF/home2.dart';
 
 void main() => runApp(new MaterialApp(
       home: MyHomePage(),
@@ -229,10 +230,12 @@ class _MyHomePageState extends State<MyHomePage> {
     Marker marker = Marker(
       markerId: markerId,
       position: LatLng(data[markerId.value][0], data[markerId.value][1]),
-      infoWindow: InfoWindow(title: markerId.value),
+      infoWindow: InfoWindow(
+          title: markerId.value,
       onTap: () {
-        _showModal(markerId.value);
+        _showDialog(context,markerId.value);
       },
+      ),
     );
 
     setState(() {
@@ -253,37 +256,7 @@ class _MyHomePageState extends State<MyHomePage> {
     Future<void> future = showModalBottomSheet<void>(
       context: context,
       builder: (BuildContext context) {
-        return Padding(
-          padding: const EdgeInsets.all(10.0),
-          child: Container(
-            child: Wrap(
-              children: <Widget>[
-                Column(
-                  children: <Widget>[
-                    Text(
-                      name,
-                      style: TextStyle(fontSize: 40),
-                    ),
-                    Text(
-                      "Address:"+shops[name][0],
-                      style: TextStyle(fontSize: 25),
-                    ),
-                    Text(
-                      "Contact:"+shops[name][1],
-                      style: TextStyle(fontSize: 25),
-                    ),
-                    RaisedButton.icon(
 
-                      onPressed: () => _launchURL("google.navigation:q=${data[name][0]},${data[name][1]}"),
-                      icon: Icon(Icons.location_on),
-                      label: Text("Open Maps"),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        );
       },
     );
     future.then((void value) => _closeModal(value));
@@ -292,4 +265,67 @@ class _MyHomePageState extends State<MyHomePage> {
   void _closeModal(void value) {
 //      Navigator.pop(context)
   }
+
+  void _showDialog(context,String name) {
+    showDialog(
+        context: context,
+        builder: (BuildContext context)
+        {
+          return Dialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(5),
+              ),
+              elevation: 0.0,
+              backgroundColor: Colors.white,
+              child: dialogContent(context,name),
+          );
+        });}
+
+  dialogContent(BuildContext context, String name) {
+    return Padding(
+      padding: const EdgeInsets.all(10.0),
+      child: Container(
+        child: Wrap(
+          children: <Widget>[
+            Column(
+              children: <Widget>[
+                Text(
+                  name,
+                  style: TextStyle(fontSize: 40),
+                ),
+                Text(
+                  "Address:"+shops[name][0],
+                  style: TextStyle(fontSize: 25),
+                ),
+                Text(
+                  "Contact:"+shops[name][1],
+                  style: TextStyle(fontSize: 25),
+                ),
+                Row(
+                  children: <Widget>[
+                    RaisedButton.icon(
+
+                      onPressed: () => _launchURL("google.navigation:q=${data[name][0]},${data[name][1]}"),
+                      icon: Icon(Icons.location_on),
+                      label: Text("Open Maps"),
+                    ),
+                    RaisedButton.icon(
+
+                      onPressed: () => {
+                        Navigator.push(context, MaterialPageRoute(builder: (context) => FilePickerDemo(name)),)
+                      },
+                      icon: Icon(Icons.cloud_upload),
+                      label: Text("Open Maps"),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
 }
+

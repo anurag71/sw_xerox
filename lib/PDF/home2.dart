@@ -8,13 +8,28 @@ import 'package:flutter/services.dart';
 import 'package:file_picker/file_picker.dart';
 import 'pdfview.dart';
 import 'savelist.dart';
+import 'package:toast/toast.dart';
 
 class FilePickerDemo extends StatefulWidget {
+
+  String fName;
+  FilePickerDemo(String markerId){
+    fName = markerId;
+  }
+
   @override
-  _FilePickerDemoState createState() => new _FilePickerDemoState();
+  _FilePickerDemoState createState() => new _FilePickerDemoState(fName);
 }
 
 class _FilePickerDemoState extends State<FilePickerDemo> {
+
+  static String folderName;
+
+  _FilePickerDemoState(String fname){
+    folderName=fname;
+  }
+
+
   String _fileName = '...';
    String assetPDFPath = ' ';
   String _path = '...';
@@ -187,20 +202,22 @@ class _FilePickerDemoState extends State<FilePickerDemo> {
             child: new RaisedButton(
               onPressed: () async {
                 final StorageReference storageRef =
-                    FirebaseStorage.instance.ref().child(_fileName);
-                final StorageUploadTask uploadTask = storageRef.putFile(
+                    FirebaseStorage.instance.ref().child(folderName+"/"+_fileName);
+                final StorageUploadTask uploadTask = await storageRef.putFile(
                   File(_path),
                   StorageMetadata(
                     contentType: "document" + '/' + "pdf",
                   ),
                 );
-                final StorageTaskSnapshot downloadUrl =
-                    (await uploadTask.onComplete);
-                final String url = (await downloadUrl.ref.getDownloadURL());
-                print('URL Is $url');
-                DocumentReference ref = await db
-                    .collection('Url')
-                    .add({'name': '$url'});
+                if(uploadTask.isSuccessful){
+                  Toast.show("Upload Successful", context);
+                }
+                //final String url = (await downloadUrl.ref.getDownloadURL());
+                print("******************************");
+                print("Su");
+//                DocumentReference ref = await db
+//                    .collection('Url')
+//                    .add({'name': '$url'});
               },
               child: new Text("Upload File"),
             ),
