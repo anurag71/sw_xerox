@@ -9,6 +9,7 @@ import 'package:file_picker/file_picker.dart';
 import 'pdfview.dart';
 import 'savelist.dart';
 import 'package:toast/toast.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class FilePickerDemo extends StatefulWidget {
 
@@ -201,20 +202,15 @@ class _FilePickerDemoState extends State<FilePickerDemo> {
             padding: const EdgeInsets.only(top: 10.0, bottom: 10.0),
             child: new RaisedButton(
               onPressed: () async {
+                SharedPreferences prefs = await SharedPreferences.getInstance();
+                var cid = prefs.getString("cid");
                 final StorageReference storageRef =
                     FirebaseStorage.instance.ref().child(folderName+"/"+_fileName);
-                final StorageUploadTask uploadTask = await storageRef.putFile(
-                  File(_path),
-                  StorageMetadata(
-                    contentType: "document" + '/' + "pdf",
-                  ),
-                );
-                if(uploadTask.isSuccessful){
-                  Toast.show("Upload Successful", context);
-                }
-                //final String url = (await downloadUrl.ref.getDownloadURL());
-                print("******************************");
-                print("Su");
+                StorageTaskSnapshot storageTaskSnapshot = await storageRef.putFile(
+                  File(_path)).onComplete;
+                if(storageTaskSnapshot!=null){
+                  await Firestore.instance.collection("customer/$cid/Files Uploaded").document().setData({"name":_fileName,"shop":folderName});
+                  Toast.show("Upload Successful", context);}
 //                DocumentReference ref = await db
 //                    .collection('Url')
 //                    .add({'name': '$url'});

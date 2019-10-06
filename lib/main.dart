@@ -13,20 +13,27 @@ import 'package:queries/collections.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:sw_xerox/PDF/home2.dart';
 
-void main() => runApp(new MaterialApp(
-      home: MyHomePage(),
-      debugShowCheckedModeBanner: false,
-    ));
+
 
 class MyHomePage extends StatefulWidget {
-  MyHomePage({Key key, this.title}) : super(key: key);
-  final String title;
+  String name;
+
+  MyHomePage(cid){
+    this.name = cid;
+  }
 
   @override
-  _MyHomePageState createState() => _MyHomePageState();
+  _MyHomePageState createState() => _MyHomePageState(name);
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  String name;
+
+  _MyHomePageState(name){
+    this.name = name;
+  }
+
+
   location_class.LocationData _currentLocation;
 
   StreamSubscription<location_class.LocationData> _locationSubscription;
@@ -139,6 +146,7 @@ class _MyHomePageState extends State<MyHomePage> {
             body: Center(
               child: AlertDialog(
                 title: Text("Location Required"),
+                content: Text("Hey "+name+"! Please provide location access to continue."),
                 actions: <Widget>[
                   FlatButton(
                       onPressed: () {
@@ -159,10 +167,10 @@ class _MyHomePageState extends State<MyHomePage> {
 
     list.forEach((DocumentSnapshot snap) => {
           data.addAll({
-            snap.data["name"]: [snap.data["latitude"], snap.data["longitude"]]
+            snap.documentID.substring(0,5): [snap.data["latitude"], snap.data["longitude"]]
           }),
           shops.addAll({
-            snap.data["name"]: [snap.data["address"], snap.data["contact"]]
+            snap.documentID.substring(0,5): [snap.data["name"], snap.data["address"], snap.data["contact"]]
           })
         });
     print("The is the data fetched");
@@ -224,14 +232,14 @@ class _MyHomePageState extends State<MyHomePage> {
     print("----------------------------");
   }
 
-  _add(name) {
-    MarkerId markerId = MarkerId(name);
+  _add(shopID) {
+    MarkerId markerId = MarkerId(shopID);
 
     Marker marker = Marker(
       markerId: markerId,
       position: LatLng(data[markerId.value][0], data[markerId.value][1]),
       infoWindow: InfoWindow(
-          title: markerId.value,
+          title: shops[markerId.value][0],
       onTap: () {
         _showDialog(context,markerId.value);
       },
@@ -252,21 +260,7 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
-  void _showModal(name) {
-    Future<void> future = showModalBottomSheet<void>(
-      context: context,
-      builder: (BuildContext context) {
-
-      },
-    );
-    future.then((void value) => _closeModal(value));
-  }
-
-  void _closeModal(void value) {
-//      Navigator.pop(context)
-  }
-
-  void _showDialog(context,String name) {
+  void _showDialog(context,String shopID) {
     showDialog(
         context: context,
         builder: (BuildContext context)
@@ -277,11 +271,11 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
               elevation: 0.0,
               backgroundColor: Colors.white,
-              child: dialogContent(context,name),
+              child: dialogContent(context,shopID),
           );
         });}
 
-  dialogContent(BuildContext context, String name) {
+  dialogContent(BuildContext context, String shopID) {
     return Padding(
       padding: const EdgeInsets.all(10.0),
       child: Container(
@@ -290,32 +284,38 @@ class _MyHomePageState extends State<MyHomePage> {
             Column(
               children: <Widget>[
                 Text(
-                  name,
+                  shops[shopID][0],
                   style: TextStyle(fontSize: 40),
                 ),
                 Text(
-                  "Address:"+shops[name][0],
+                  "Address:"+shops[shopID][1],
                   style: TextStyle(fontSize: 25),
                 ),
                 Text(
-                  "Contact:"+shops[name][1],
+                  "Contact:"+shops[shopID][2],
                   style: TextStyle(fontSize: 25),
                 ),
                 Row(
                   children: <Widget>[
-                    RaisedButton.icon(
+                    Padding(
+                      padding: const EdgeInsets.all(1.5),
+                      child: RaisedButton.icon(
 
-                      onPressed: () => _launchURL("google.navigation:q=${data[name][0]},${data[name][1]}"),
-                      icon: Icon(Icons.location_on),
-                      label: Text("Open Maps"),
+                        onPressed: () => _launchURL("google.navigation:q=${data[shopID][0]},${data[shopID][1]}"),
+                        icon: Icon(Icons.location_on),
+                        label: Text("Open Maps"),
+                      ),
                     ),
-                    RaisedButton.icon(
+                    Padding(
+                      padding: const EdgeInsets.all(2.0),
+                      child: RaisedButton.icon(
 
-                      onPressed: () => {
-                        Navigator.push(context, MaterialPageRoute(builder: (context) => FilePickerDemo(name)),)
-                      },
-                      icon: Icon(Icons.cloud_upload),
-                      label: Text("Open Maps"),
+                        onPressed: () => {
+                          Navigator.push(context, MaterialPageRoute(builder: (context) => FilePickerDemo(shopID)),)
+                        },
+                        icon: Icon(Icons.cloud_upload),
+                        label: Text("Upload Document"),
+                      ),
                     ),
                   ],
                 ),
