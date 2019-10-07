@@ -16,22 +16,12 @@ import 'package:sw_xerox/PDF/home2.dart';
 
 
 class MyHomePage extends StatefulWidget {
-  String name;
-
-  MyHomePage(cid){
-    this.name = cid;
-  }
 
   @override
-  _MyHomePageState createState() => _MyHomePageState(name);
+  _MyHomePageState createState() => _MyHomePageState();
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  String name;
-
-  _MyHomePageState(name){
-    this.name = name;
-  }
 
 
   location_class.LocationData _currentLocation;
@@ -146,7 +136,7 @@ class _MyHomePageState extends State<MyHomePage> {
             body: Center(
               child: AlertDialog(
                 title: Text("Location Required"),
-                content: Text("Hey "+name+"! Please provide location access to continue."),
+                content: Text("Please provide location access to continue."),
                 actions: <Widget>[
                   FlatButton(
                       onPressed: () {
@@ -167,10 +157,10 @@ class _MyHomePageState extends State<MyHomePage> {
 
     list.forEach((DocumentSnapshot snap) => {
           data.addAll({
-            snap.documentID.substring(0,5): [snap.data["latitude"], snap.data["longitude"]]
+            snap.documentID: [snap.data["latitude"], snap.data["longitude"]]
           }),
           shops.addAll({
-            snap.documentID.substring(0,5): [snap.data["name"], snap.data["address"], snap.data["contact"]]
+            snap.documentID: [snap.data["name"], snap.data["address"], snap.data["contact"]]
           })
         });
     print("The is the data fetched");

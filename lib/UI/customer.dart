@@ -3,10 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sw_xerox/main.dart';
 
-void main() => runApp(new MaterialApp(
-  home: customer(),
-  debugShowCheckedModeBanner: false,
-));
+
 
 class customer extends StatefulWidget{
 
@@ -70,7 +67,7 @@ class custRegister extends State<customer>{
                           //---------GO TO NEXT PAGE---------------//
                           FocusScope.of(context).requestFocus(FocusNode());
                           _createDocument();
-                          Navigator.push(context, MaterialPageRoute(builder: (context) => MyHomePage(_nameController.value.text)),);
+                          Navigator.push(context, MaterialPageRoute(builder: (context) => MyHomePage()),);
                         }
                       });
                     },
