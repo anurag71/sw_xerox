@@ -9,6 +9,7 @@ import 'package:location/location.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sw_xerox/main.dart';
 import 'package:flutter/services.dart';
+import 'ownerview.dart';
 
 class LoginPage extends StatefulWidget {
   @override
@@ -22,6 +23,8 @@ class _LoginPageState extends State<LoginPage> {
   String contact;
   double lat, lon;
   final databaseReference = Firestore.instance;
+
+  String shopId;
   //Geolocator geolocator = Geolocator();
 
   @override
@@ -157,10 +160,10 @@ class _LoginPageState extends State<LoginPage> {
         new RaisedButton(
           onPressed: () => {
             _sendToServer(),
-//            Navigator.push(
-//              context,
-//              MaterialPageRoute(builder: (context) => MyHomePage()),
-//            )
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => OwnerView(id:shopId )),
+            )
           },
           child: new Text('Upload'),
         )
@@ -198,6 +201,7 @@ class _LoginPageState extends State<LoginPage> {
       Firestore.instance.runTransaction((Transaction transaction) async {
         DocumentReference reference =
             Firestore.instance.collection('Xerox Shops').document();
+        shopId = reference.documentID;
         await reference.setData({
           "name": "$name",
           "contact": "$contact",

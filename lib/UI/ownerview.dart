@@ -7,16 +7,20 @@ class OwnerView extends StatefulWidget {
 
   const OwnerView({Key key,@required this.id}) : super(key: key);
   @override
-  _OwnerViewState createState() => _OwnerViewState();
+  _OwnerViewState createState() => _OwnerViewState(shopId: id);
 }
 
 class _OwnerViewState extends State<OwnerView> {
+
+  final shopId;
+  _OwnerViewState({Key key,@required this.shopId});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text("Documents to be printed"),
-        centerTitle: true,
+        backgroundColor: Colors.deepOrange[300],
       ),
       body: _buildBody(context),
       
@@ -24,74 +28,83 @@ class _OwnerViewState extends State<OwnerView> {
   }
   Widget _buildBody(BuildContext context) {
  return StreamBuilder<QuerySnapshot>(
-  // stream: Firestore.instance.collection('Xerox Shops').document('${widget.id}').collection("files received").snapshots(),
-   stream: Firestore.instance.collection('Url').snapshots(),
+stream: Firestore.instance.collection('Xerox Shops').document(shopId).collection("files received").snapshots(),
+//   stream: Firestore.instance.collection('Url').snapshots(),
     builder: (context, snapshot) {
-     if (!snapshot.hasData) return LinearProgressIndicator();
-
-     return _buildList(context, snapshot.data.documents);
-   },
+      //if (!snapshot.hasData) return LinearProgressIndicator();
+      if (snapshot.data.documents.length != 0) {
+        return ListView.builder(
+            itemCount: snapshot.data.documents.length,
+            itemBuilder: (context, index) {
+              DocumentSnapshot ds = snapshot.data.documents[index];
+              return _buildListItem(ds);
+            }
+        );
+      }
+      else{
+        return Center(
+          child: Text("No orders yet."),
+        );
+      }
+    }
  );
-}
+    }
 
- Widget _buildList(BuildContext context,List<DocumentSnapshot> snapshot) {
-   return ListView(
-     scrollDirection: Axis.vertical,
-      cacheExtent:10000000,
-     padding: const EdgeInsets.only(top: 20.0),
-     children: snapshot.map((data) => _buildListItem(context, data)).toList(),
-   );
- }
 
-Widget _buildListItem(BuildContext context, DocumentSnapshot data) {
- final record = Record.fromSnapshot(data);
+
+  Widget _buildListItem(data) {
+    //final record = Record.fromSnapshot(data);
     return Padding(
-     key: ValueKey(record.name),
-     padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-     child: Container(
-       
-       child: Card(
-         child: Column(
-           children: <Widget>[
-             ExpansionTile(
-               title: Text(record.name.substring(record.name.lastIndexOf("appspot.com/o/")+14,record.name.lastIndexOf(".pdf"))+".pdf"),
-               children: <Widget>[
-                 IconButton(
-                    icon: Icon(Icons.arrow_downward),
-                    tooltip: "press to download",
-                    splashColor: Colors.yellowAccent,
-                    onPressed: () {
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+      child: Container(
+
+        child: Card(
+          child: Column(
+            children: <Widget>[
+              ExpansionTile(
+                title: Column(
+                  children: <Widget>[
+                    Text(data["file name"]),
+                    Row(
+                      children: <Widget>[
+                        Text("Ordered by:"),Text(data["ordered by"]),
+                      ],
+                    ),
+                  ],
+                ),
+                children: <Widget>[
+                  RaisedButton.icon(
+                    icon: Icon(Icons.cloud_download),
+                    label: Text("Download Document"),
+                    onPressed: () =>{
                       Navigator.push(
                         context,
                         MaterialPageRoute(
                             builder: (context) => Download(
-                                vidurl:record.name
-                                    )),
-                      );
+                                vidurl:data["pdf_url"]
+                            )),
+                      ),
+
                     },
                   ),
-               ],
-             ),
-           ],
-         ),
-              
-         
-       ),
+                  RaisedButton.icon(
+                    icon: Icon(Icons.check),
+                    label: Text("Processed"),
+                    onPressed:() async {
+                      await Firestore.instance.collection("Xerox Shops/$shopId/files received").document(data["orderId"]).updateData({"order status":"Processed"});
+                    },
 
-     ),
-   );
- }
+                  ),
+
+                ],
+              ),
+            ],
+          ),
+
+
+        ),
+
+      ),
+    );
+  }
 }
-
-class Record {
-final String name;
-final DocumentReference reference;
-
- Record.fromMap(Map<String, dynamic> map, {this.reference})
-     : assert(map['name'] != null),
-       name = map['name'];
-
- Record.fromSnapshot(DocumentSnapshot snapshot)
-     : this.fromMap(snapshot.data, reference: snapshot.reference);
-
- }

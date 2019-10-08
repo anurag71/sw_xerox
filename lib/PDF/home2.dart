@@ -12,9 +12,9 @@ import 'package:toast/toast.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class FilePickerDemo extends StatefulWidget {
-
   String fName;
-  FilePickerDemo(String markerId){
+
+  FilePickerDemo(String markerId) {
     fName = markerId;
   }
 
@@ -23,28 +23,30 @@ class FilePickerDemo extends StatefulWidget {
 }
 
 class _FilePickerDemoState extends State<FilePickerDemo> {
-
+  bool _uploaded = false;
   static String folderName;
+  String order;
 
-  _FilePickerDemoState(String fname){
-    folderName=fname;
+  _FilePickerDemoState(String fname) {
+    folderName = fname;
   }
 
-
   String _fileName = '...';
-   String assetPDFPath = ' ';
+  String assetPDFPath = ' ';
   String _path = '...';
   final db = Firestore.instance;
+
 //String _extension="PDF";
   //bool _hasValidMime = false;
   FileType _pickingType = FileType.CUSTOM;
+
   //TextEditingController _controller = new TextEditingController();
 
   @override
   void initState() {
     super.initState();
-   }
-  
+  }
+
   void _openFileExplorer() async {
     //if (_pickingType == FileType.CUSTOM || _hasValidMime) {
     try {
@@ -66,8 +68,8 @@ class _FilePickerDemoState extends State<FilePickerDemo> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: new AppBar(
-        title: const Text('Pdf proxy'),
-        centerTitle: true,
+        title: const Text("Xerox"),
+        backgroundColor: Colors.deepOrange[300],
         actions: <Widget>[
           IconButton(
             icon: Icon(Icons.view_list),
@@ -146,36 +148,7 @@ class _FilePickerDemoState extends State<FilePickerDemo> {
                 ),
               ),
               _uploadpdf(),
-              new Padding(
-                padding: const EdgeInsets.only(top: 10.0, bottom: 10.0),
-                child: new RaisedButton(
-                  onPressed: () => _viewpdf(),
-                  child: new Text("View the document"),
-                ),
-              ),
-              new Text(
-                'URI PATH ',
-                textAlign: TextAlign.center,
-                style: new TextStyle(fontWeight: FontWeight.bold),
-              ),
-              new Text(
-                _path ?? '...',
-                textAlign: TextAlign.center,
-                softWrap: true,
-                textScaleFactor: 0.85,
-              ),
-              new Padding(
-                padding: const EdgeInsets.only(top: 10.0),
-                child: new Text(
-                  'FILE NAME ',
-                  textAlign: TextAlign.center,
-                  style: new TextStyle(fontWeight: FontWeight.bold),
-                ),
-              ),
-              new Text(
-                _fileName,
-                textAlign: TextAlign.center,
-              ),
+              _widgetList(),
             ],
           ),
         )),
@@ -183,18 +156,67 @@ class _FilePickerDemoState extends State<FilePickerDemo> {
     );
   }
 
+  Widget _widgetList() {
+    if (!_uploaded) {
+      return Column(
+        children: <Widget>[
+          new Padding(
+            padding: const EdgeInsets.only(top: 10.0, bottom: 10.0),
+            child: new RaisedButton(
+              onPressed: () => _viewpdf(),
+              child: new Text("View the document"),
+            ),
+          ),
+          new Text(
+            'URI PATH ',
+            textAlign: TextAlign.center,
+            style: new TextStyle(fontWeight: FontWeight.bold),
+          ),
+          new Text(
+            _path ?? '...',
+            textAlign: TextAlign.center,
+            softWrap: true,
+            textScaleFactor: 0.85,
+          ),
+          new Padding(
+            padding: const EdgeInsets.only(top: 10.0),
+            child: new Text(
+              'FILE NAME ',
+              textAlign: TextAlign.center,
+              style: new TextStyle(fontWeight: FontWeight.bold),
+            ),
+          ),
+          new Text(
+            _fileName,
+            textAlign: TextAlign.center,
+          ),
+        ],
+      );
+    }
+    else
+      {
+        return SizedBox();
+      }
+  }
 
   Widget _viewpdf() {
-                 Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (BuildContext context) =>  PdfViewPage(path: _path)));
-
-    
+    Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (BuildContext context) => PdfViewPage(path: _path)));
   }
 
   Widget _uploadpdf() {
-    
+    if (_uploaded) {
+      return Dialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(5),
+        ),
+        elevation: 0.0,
+        backgroundColor: Colors.white,
+        child: dialogContent(context),
+      );
+    }
     return Center(
       child: Column(
         children: <Widget>[
@@ -204,17 +226,36 @@ class _FilePickerDemoState extends State<FilePickerDemo> {
               onPressed: () async {
                 SharedPreferences prefs = await SharedPreferences.getInstance();
                 var cid = prefs.getString("cid");
-                final StorageReference storageRef =
-                    FirebaseStorage.instance.ref().child(folderName+"/"+_fileName);
-                StorageTaskSnapshot storageTaskSnapshot = await storageRef.putFile(
-                  File(_path)).onComplete;
-                if(storageTaskSnapshot!=null){
-                  await Firestore.instance.collection("customer/$cid/Files Uploaded").document().setData({"name":_fileName,"shop":folderName});
+                final StorageReference storageRef = FirebaseStorage.instance
+                    .ref()
+                    .child(folderName + "/" + _fileName);
+                StorageTaskSnapshot storageTaskSnapshot =
+                    await storageRef.putFile(File(_path)).onComplete;
+                if (storageTaskSnapshot != null) {
+                  String name;
+                  await Firestore.instance
+                      .document("customer/$cid")
+                      .get()
+                      .then(((document) {
+                    name = document.data["name"];
+                  }));
+                  String url = await storageTaskSnapshot.ref.getDownloadURL();
+                  DocumentReference docref = db
+                      .collection("Xerox Shops/$folderName/files received")
+                      .document();
+                  order = docref.documentID;
+                  await docref.setData({
+                    "ordered by": name,
+                    "orderId": order,
+                    "file name": _fileName,
+                    "order status": "Accepted",
+                    "pdf_url": url
+                  });
                   Toast.show("Upload Successful", context);
-                await db
-                   .collection("Xerox Shops/$folderName/files received").document('$cid').setData({'pdf_url': _fileName});
-                   
-                   }
+                  setState(() {
+                    _uploaded = true;
+                  });
+                }
               },
               child: new Text("Upload File"),
             ),
@@ -222,5 +263,27 @@ class _FilePickerDemoState extends State<FilePickerDemo> {
         ],
       ),
     );
+  }
+
+  dialogContent(BuildContext context) {
+    return Padding(
+        padding: const EdgeInsets.all(10.0),
+        child: StreamBuilder(
+            stream: db
+                .collection("Xerox Shops/$folderName/files received")
+                .document(order)
+                .snapshots(),
+            builder: (context, snapshot) {
+              return Wrap(
+                children: <Widget>[
+                  Row(
+                    children: <Widget>[
+                      Text("Order Status:"),
+                      Text(snapshot.data["order status"]),
+                    ],
+                  ),
+                ],
+              );
+            }));
   }
 }

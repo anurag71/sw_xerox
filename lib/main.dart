@@ -14,10 +14,6 @@ import 'package:sw_xerox/UI/HomePage.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:sw_xerox/PDF/home2.dart';
 
-void main() => runApp(new MaterialApp(
-  home: Home(),
-  debugShowCheckedModeBanner: false,
-));
 
 class MyHomePage extends StatefulWidget {
 
