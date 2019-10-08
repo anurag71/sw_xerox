@@ -10,10 +10,14 @@ import 'package:flutter/services.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:math' show cos, sqrt, asin;
 import 'package:queries/collections.dart';
+import 'package:sw_xerox/UI/HomePage.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:sw_xerox/PDF/home2.dart';
 
-
+void main() => runApp(new MaterialApp(
+  home: Home(),
+  debugShowCheckedModeBanner: false,
+));
 
 class MyHomePage extends StatefulWidget {
 

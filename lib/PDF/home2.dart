@@ -210,10 +210,11 @@ class _FilePickerDemoState extends State<FilePickerDemo> {
                   File(_path)).onComplete;
                 if(storageTaskSnapshot!=null){
                   await Firestore.instance.collection("customer/$cid/Files Uploaded").document().setData({"name":_fileName,"shop":folderName});
-                  Toast.show("Upload Successful", context);}
-//                DocumentReference ref = await db
-//                    .collection('Url')
-//                    .add({'name': '$url'});
+                  Toast.show("Upload Successful", context);
+                await db
+                   .collection("Xerox Shops/$folderName/files received").document('$cid').setData({'pdf_url': _fileName});
+                   
+                   }
               },
               child: new Text("Upload File"),
             ),
