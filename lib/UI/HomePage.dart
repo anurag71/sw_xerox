@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:sw_xerox/UI/ownerview.dart';
 import 'shopkeeper.dart';
 import 'customer.dart';
 import 'package:sw_xerox/main.dart';
@@ -21,7 +22,7 @@ class _HomePage extends State<Home>{
   bool _isowner = false;
 
   String cid;
-
+   String shopId;
   @override
   void initState() {
     // TODO: implement initState
@@ -86,14 +87,14 @@ class _HomePage extends State<Home>{
       return MyHomePage();
     }
     else{
-
+        return OwnerView(id:shopId);
     }
   }
 
   void check() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     cid = await prefs.getString("cid");
-    String shopId = await prefs.getString("shopId");
+    shopId = await prefs.getString("shopId");
     if(cid!=null){
       setState(() {
         _iscustomer = true;
