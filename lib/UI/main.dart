@@ -4,7 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sw_xerox/UI/ownerview.dart';
 import 'shopkeeper.dart';
 import 'customer.dart';
-import 'package:sw_xerox/main.dart';
+import 'package:sw_xerox/UI/CustomerLanding.dart';
 
 void main() => runApp(new MaterialApp(
   home: Home(),

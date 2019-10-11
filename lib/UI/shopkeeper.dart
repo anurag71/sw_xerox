@@ -7,7 +7,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:sw_xerox/main.dart';
+import 'package:sw_xerox/UI/CustomerLanding.dart';
 import 'package:flutter/services.dart';
 import 'ownerview.dart';
 
